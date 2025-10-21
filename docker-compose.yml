@@ -1,0 +1,47 @@
+version: "3.8"
+services:
+  broker0:
+    build: ./broker
+    container_name: broker0
+    networks: [kmm]
+    ports:
+      - "127.0.0.1:1884:1883"
+      - "127.0.0.1:9001:9001"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+
+  client1:
+    build: ./client1
+    container_name: client1
+    networks: [kmm]
+    command: [ "sleep", "infinity" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+
+  client2:
+    build: ./client2
+    container_name: client2
+    networks: [kmm]
+    command: [ "sleep", "infinity" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+
+  tracker:
+    build: ./tracker
+    container_name: tracker
+    networks: [kmm]
+    command: [ "python3", "/app/tracker.py" ]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+
+networks:
+  kmm:
+    driver: bridge
