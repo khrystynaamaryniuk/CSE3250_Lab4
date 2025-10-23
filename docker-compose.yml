@@ -1,4 +1,5 @@
-version: "3.8"
+version: "3.9"
+
 services:
   broker0:
     build: ./broker
@@ -15,8 +16,8 @@ services:
   client1:
     build: ./client1
     container_name: client1
+    depends_on: [broker0]
     networks: [kmm]
-    command: [ "sleep", "infinity" ]
     deploy:
       resources:
         limits:
@@ -25,8 +26,8 @@ services:
   client2:
     build: ./client2
     container_name: client2
+    depends_on: [broker0]
     networks: [kmm]
-    command: [ "sleep", "infinity" ]
     deploy:
       resources:
         limits:
@@ -35,8 +36,12 @@ services:
   tracker:
     build: ./tracker
     container_name: tracker
+    depends_on: [broker0, client1, client2]
     networks: [kmm]
-    command: [ "python3", "/app/tracker.py" ]
+    environment:
+      - BROKER_HOST=broker0
+      - ROUNDS=5
+      - TIMEOUT=20
     deploy:
       resources:
         limits:

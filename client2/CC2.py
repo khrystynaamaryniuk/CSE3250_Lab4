@@ -1,14 +1,10 @@
-#
 # From: "Chains that bind us" by Phillip G. Bradford
-#  https://github.com/wonder-phil/ChainsThatBindUs
-#     
-#
-#
+# Minimal student edits: (A) only start on 'start', (B) publish result to 'result'
 import datetime
 import hashlib
-import sys
 import paho.mqtt.client as mqtt
-import time 
+import time
+
 # globals
 mine = ""
 blockData = ""
@@ -19,47 +15,48 @@ def on_message(client, userdata, message):
   global mine
   if message.topic == "mine":
     print(message.topic + " topic says : " + message.payload.decode('utf-8'))
-    mine = message.payload.decode('utf-8')
+    mine = message.payload.decode('utf-8').strip()
   elif message.topic == "blockData":
     print(message.topic + " topic says : " + message.payload.decode('utf-8'))
-    blockData = message.payload.decode('utf-8')
+    blockData = message.payload.decode('utf-8').strip()
   else:
     print(message.topic + " <unknown topic> says : " + message.payload.decode('utf-8'))
 
 def run_chain():
-
   global mine
   global nonce
 
   client = mqtt.Client()
   client.connect("broker0", 1883)
   client.on_message = on_message
-  client.clean_run = True
-  client.subscribe("mine",qos=1)
-  client.subscribe("blockData",qos=1)
+  client.clean_session = True
+  client.subscribe("mine", qos=1)
+  client.subscribe("blockData", qos=1)
 
-  b = BlockMqtt("genesis","data")
+  b = BlockMqtt("genesis", "data")
 
   client.loop_start()
   while True:
-    while True: # event loop - mine
-      if len(mine) != 0:
+    while True:  # event loop - wait to mine
+      # (A): only start when broker sends the literal word 'start'
+      if mine.lower() == "start":
         print("start mining")
         break
       time.sleep(0.25)
-    x = b.mine(client,5)
-    client.publish("mine","CC2 won!")
-    mine = ""
+
+    x = b.mine(client, 5)
+    # (B): announce the winner on 'result' topic (not 'mine')
+    client.publish("result", "CC2 won!")
+    mine = ""   # ready for next round
     print(x)
     nonce = nonce + 1
     b.compHash()
-
 
 class BlockMqtt:
   hashFunction = ""
   bHash = ""
 
-  def __init__(self,prevHash, data):
+  def __init__(self, prevHash, data):
     blockData = ""
     self.prevHash = prevHash
     self.data = data
@@ -69,45 +66,43 @@ class BlockMqtt:
 
   def compHash(self):
     hashFunction = hashlib.new('sha256')
-    myStr = str(self.prevHash)+str(self.data)+str(self.time)+str(nonce)
+    myStr = str(self.prevHash) + str(self.data) + str(self.time) + str(nonce)
     myBytes = myStr.encode()
     hashFunction.update(myBytes)
     self.bHash = hashFunction.hexdigest()
-
     return self.bHash
 
-  def mine(self,client,diff):
+  def mine(self, client, diff):
     global mine
     global nonce
     global blockData
     blockData = ""
 
     self.interrupted = False
-    #client.loop_start()
-    self.target = "0"*diff
+    self.target = "0" * diff
 
     while self.bHash[0:diff] != self.target:
-      if len(blockData) != 0:
+      if len(blockData) != 0:  # tracker told us to stop
         print("break")
         self.interrupted = True
         time.sleep(0.25)
         break
-
-      nonce = nonce + 3
+      nonce = nonce + 3     # CC2 explores faster/non-overlapping stride
       self.compHash()
 
     return self
 
-  def update(self,prevHash,data):
+  def update(self, prevHash, data):
     self.prevHash = prevHash
     self.data = data
 
   def __str__(self):
-    s = 'prevHash: '+ self.prevHash + '\n'
+    s = 'prevHash: ' + self.prevHash + '\n'
     s = s + 'data: ' + self.data + '\n'
     s = s + 'time: ' + str(self.time) + '\n'
     s = s + 'nonce: ' + str(nonce) + '\n'
     s = s + 'interrupted: ' + str(self.interrupted) + '\n'
     s = s + 'bHash: ' + self.bHash + '\n'
-
     return s
+if __name__ == "__main__":
+    run_chain()
