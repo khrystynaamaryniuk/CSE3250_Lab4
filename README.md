@@ -1,10 +1,9 @@
- How to Run
-  Create Docker network
-  docker network create kmm
-Build and start everything
-  docker compose up --build
-This automatically builds and runs:
-  broker0 (Mosquitto broker)
-  client1 (Miner 1)
-  client2 (Miner 2)
-  tracker (Round manager)
+## Clockchain MQTT Lab
+This project simulates a simple blockchain (“Clockchain”) using MQTT and Docker.  
+Two clients mine blocks, a Mosquitto broker handles messaging, and a tracker records the winner of each round.
+
+Based on https://github.com/wonder-phil/ChainsThatBindUs.git
+## How to Run
+
+docker network create kmm
+docker compose up --build
