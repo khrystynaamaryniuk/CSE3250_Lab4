@@ -158,21 +158,6 @@ environment:
 | `result` | CC1/CC2 | Tracker | Victory announcement |
 | `blockData` | Tracker | CC1, CC2 | Stop signal to halt mining |
 
-### Containerization Details
-- Each service runs in isolated container with CPU limits (preventing resource hogging)
-- Services communicate via `kmm` bridge network
-- Mosquitto persistence enabled for message durability
-- All containers depend on broker readiness before starting clients
-
-## Learning Outcomes
-
-This project demonstrates:
-- ✅ Docker containerization and multi-container orchestration
-- ✅ MQTT pub/sub messaging patterns in distributed systems
-- ✅ Blockchain fundamentals (proof-of-work, hash challenges)
-- ✅ Race condition handling and competitive synchronization
-- ✅ Resource-constrained concurrent computing
-- ✅ Event-driven architecture with asynchronous communication
 
 ## Attribution
 
