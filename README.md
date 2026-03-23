@@ -98,7 +98,7 @@ This project showcases a simplified blockchain ("Clockchain") where two competit
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd CSE3250_Lab4
+   cd Clockchain
    ```
 
 2. **Create the Docker network** (if not already present)
